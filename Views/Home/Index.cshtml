@@ -1,0 +1,88 @@
+﻿@using AutomationManagementTool.Models;
+@using TelluriumCore.Reporting.TestRun;
+@model IEnumerable<TelluriumCore.Reporting.TestRun.ITestReport>
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1>TELLURIUM MANAGEMENT TOOL</h1>
+    <p class="lead">I hope everything is fine, look below :)</p>
+</div>
+
+<div class="container">
+    <h2>Automation Failure Status</h2>
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row" data-toggle="collapse" href="#testcases">
+                    <div class="col-md-8">Yesterday's Noon Run</div>
+                    <div class="col-md-4"><span class="badge">@Model.Count()</span></div>
+                </div>
+            </div>
+            <div id="testcases" class="panel-collapse collapse">
+                <div class="panel-body table table-bordered">
+                    <div class="row">
+                        <h3 class="col-md-3">@Html.DisplayNameFor(model => model.ProjectName)</h3>
+                        <h3 class="col-md-3">@Html.DisplayNameFor(model => model.TestMode)</h3>
+                        <h3 class="col-md-2">@Html.DisplayNameFor(model => model.TestedBrowser.Name)</h3>
+                        <h3 class="col-md-2">@Html.DisplayNameFor(model => model.MachineName)</h3>
+                        <h3 class="col-md-2"># of Failures</h3>
+                    </div>
+                    @{
+                        var noonReport = TestReports.getNoonRunTestReports(Model);
+                        var reportCount = 1;
+                    }
+                    @foreach (var report in noonReport)
+                    {
+                        <div data-toggle="collapse" href="#transactions@(reportCount)">
+                            <div class="row">
+                                <div class="col-md-3">@Html.DisplayFor(reportItem => report.ProjectName)</div>
+                                <div class="col-md-3">@Html.DisplayFor(reportItem => report.TestMode.Name)</div>
+                                <div class="col-md-2">@Html.DisplayFor(reportItem => report.TestedBrowser.Name)</div>
+                                <div class="col-md-2">@Html.DisplayFor(reportItem => report.MachineName)</div>
+                                <div class="col-md-2"><span class="badge">@Html.DisplayFor(reportItem => report.NumberOfFailures)</span></div>
+                            </div>
+
+                            @foreach (var detail in report.TestCaseRunDetails)
+                            {
+                                <div id="transactions@(reportCount)" class="panel-collapse collapse well-sm">
+                                    <div class="row">
+                                        <h4 class="col-md-3"><b>File Name</b></h4>
+                                        <h4 class="col-md-3"><b>Name</b></h4>
+                                        <h4 class="col-md-6"><b>Description</b></h4>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">@Html.DisplayFor(detailItem => detail.FileName)</div>
+                                        <div class="col-md-3">@Html.DisplayFor(detailItem => detail.Name)</div>
+                                        <div class="col-md-6">@Html.DisplayFor(detailItem => detail.Description)</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        reportCount++;
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <span class="col-md-12" />
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row" data-toggle="collapse" href="#collapse3">
+                    <div class="col-md-8">Last's Night Run</div>
+                    <div class="col-md-4">test</div>
+                </div>
+            </div>
+            <div id="collapse3" class="panel-collapse collapse">
+                <div data-toggle="collapse" href="#collapse4">
+                    <div class="panel-body">Panel Body</div>
+                </div>
+                <div id="collapse4" class="panel-collapse collapse">
+                    <div class="panel-body">Panel Body</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
