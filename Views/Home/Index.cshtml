@@ -1,52 +1,104 @@
-﻿@using AutomationManagementTool.Models;
-@using TelluriumCore.Reporting.TestRun;
+﻿@using PainFree.Helpers.TestData;
+@using PainFree.Controllers;
 @model IEnumerable<TelluriumCore.Reporting.TestRun.ITestReport>
 @{
     ViewBag.Title = "Home Page";
+
+    var beginTime = HomeController.dataBeginTime;
+    var endTime = HomeController.dataEndTime;
+
+    var noonTestData = TestData.getNoonData(beginTime, Model.ToList());
+    var nightTestData = TestData.getNightData(endTime, Model.ToList());
 }
 
 <div class="jumbotron">
     <h1>TELLURIUM MANAGEMENT TOOL</h1>
-    <p class="lead">I hope everything is fine, look below :)</p>
 </div>
 
 <div class="container">
     <h2>Automation Failure Status</h2>
     <div class="panel-group">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <div class="row" data-toggle="collapse" href="#testcases">
-                    <div class="col-md-8">Yesterday's Noon Run</div>
-                    <div class="col-md-4"><span class="badge">@Model.Count()</span></div>
+        @{var noonPanelStatus = noonTestData.Count() > 1 ? "panel panel-danger" : "panel panel-success";}
+        <div class="@(noonPanelStatus)">
+            <div class="panel-heading" data-toggle="collapse" href="#testcases1">
+                <div class="row">
+                    <div class="col-md-8">Yesterday's Noon Run - <b>@noonTestData.Count() Failures</b></div>
                 </div>
             </div>
-            <div id="testcases" class="panel-collapse collapse">
+            <div id="testcases1" class="panel-collapse collapse">
                 <div class="panel-body table table-bordered">
                     <div class="row">
-                        <h3 class="col-md-3">@Html.DisplayNameFor(model => model.ProjectName)</h3>
-                        <h3 class="col-md-3">@Html.DisplayNameFor(model => model.TestMode)</h3>
-                        <h3 class="col-md-2">@Html.DisplayNameFor(model => model.TestedBrowser.Name)</h3>
-                        <h3 class="col-md-2">@Html.DisplayNameFor(model => model.MachineName)</h3>
-                        <h3 class="col-md-2"># of Failures</h3>
+                        <h3 class="col-md-3 text-center">@Html.DisplayNameFor(model => model.ProjectName)</h3>
+                        <h3 class="col-md-3 text-center">@Html.DisplayNameFor(model => model.TestMode)</h3>
+                        <h3 class="col-md-2 text-center">@Html.DisplayNameFor(model => model.TestedBrowser.Name)</h3>
+                        <h3 class="col-md-2 text-center">@Html.DisplayNameFor(model => model.MachineName)</h3>
+                        <h3 class="col-md-2 text-center"># of Failures</h3>
                     </div>
-                    @{
-                        var noonReport = TestReports.getNoonRunTestReports(Model);
-                        var reportCount = 1;
-                    }
-                    @foreach (var report in noonReport)
+                    @{ var noonReportCount = 1; }
+                    @foreach (var report in noonTestData)
                     {
-                        <div data-toggle="collapse" href="#transactions@(reportCount)">
+                        <div data-toggle="collapse" href="#transactions@(noonReportCount)">
                             <div class="row">
-                                <div class="col-md-3">@Html.DisplayFor(reportItem => report.ProjectName)</div>
-                                <div class="col-md-3">@Html.DisplayFor(reportItem => report.TestMode.Name)</div>
-                                <div class="col-md-2">@Html.DisplayFor(reportItem => report.TestedBrowser.Name)</div>
-                                <div class="col-md-2">@Html.DisplayFor(reportItem => report.MachineName)</div>
-                                <div class="col-md-2"><span class="badge">@Html.DisplayFor(reportItem => report.NumberOfFailures)</span></div>
+                                <div class="col-md-3 text-center">@Html.DisplayFor(reportItem => report.ProjectName)</div>
+                                <div class="col-md-3 text-center">@Html.DisplayFor(reportItem => report.TestMode.Name)</div>
+                                <div class="col-md-2 text-center">@Html.DisplayFor(reportItem => report.TestedBrowser.Name)</div>
+                                <div class="col-md-2 text-center">@Html.DisplayFor(reportItem => report.MachineName)</div>
+                                <div class="col-md-2 text-center"><span class="badge">@Html.Raw(report.TestCaseRunDetails.Where(detailItem => detailItem.Passed == false).Count())</span></div>
                             </div>
-
-                            @foreach (var detail in report.TestCaseRunDetails)
-                            {
-                                <div id="transactions@(reportCount)" class="panel-collapse collapse well-sm">
+                            <div id="transactions@(noonReportCount)" class="panel-collapse collapse well-sm">
+                                @foreach (var detail in report.TestCaseRunDetails.Where(detailItem => detailItem.Passed == false))
+                                {
+                                    <div class="row">
+                                        <h4 class="col-md-3 text-center">File Name</h4>
+                                        <h4 class="col-md-3 text-center">Name</h4>
+                                        <h4 class="col-md-6 text-center">Description</h4>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3 text-center">@Html.DisplayFor(detailItem => detail.FileName)</div>
+                                        <div class="col-md-3 text-center">@Html.DisplayFor(detailItem => detail.Name)</div>
+                                        <div class="col-md-6 text-center">@Html.DisplayFor(detailItem => detail.Description)</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        noonReportCount++;
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <span class="col-md-12" />
+    <div class="panel-group">
+        @{var nightPanelStatus = nightTestData.Count() > 1 ? "panel panel-danger" : "panel panel-success";}
+        <div class="@(nightPanelStatus)">
+            <div class="panel-heading" data-toggle="collapse" href="#testcases2">
+                <div class="row">
+                    <div class="col-md-8">Last's Nights Run - <b>@nightTestData.Count() Failures</b></div>
+                </div>
+            </div>
+            <div id="testcases2" class="panel-collapse collapse">
+                <div class="panel-body table table-bordered">
+                    <div class="row">
+                        <h3 class="col-md-3 text-center">@Html.DisplayNameFor(model => model.ProjectName)</h3>
+                        <h3 class="col-md-3 text-center">@Html.DisplayNameFor(model => model.TestMode)</h3>
+                        <h3 class="col-md-2 text-center">@Html.DisplayNameFor(model => model.TestedBrowser.Name)</h3>
+                        <h3 class="col-md-2 text-center">@Html.DisplayNameFor(model => model.MachineName)</h3>
+                        <h3 class="col-md-2 text-center"># of Failures</h3>
+                    </div>
+                    @{ var nightReportCount = 1; }
+                    @foreach (var report in nightTestData)
+                    {
+                        <div data-toggle="collapse" href="#transactions@(nightReportCount)">
+                            <div class="row">
+                                <div class="col-md-3 text-center">@Html.DisplayFor(reportItem => report.ProjectName)</div>
+                                <div class="col-md-3 text-center">@Html.DisplayFor(reportItem => report.TestMode.Name)</div>
+                                <div class="col-md-2 text-center">@Html.DisplayFor(reportItem => report.TestedBrowser.Name)</div>
+                                <div class="col-md-2 text-center">@Html.DisplayFor(reportItem => report.MachineName)</div>
+                                <div class="col-md-2 text-center"><span class="badge">@Html.Raw(report.TestCaseRunDetails.Where(detailItem => detailItem.Passed == false).Count())</span></div>
+                            </div>
+                            <div id="transactions@(nightReportCount)" class="panel-collapse collapse well-sm">
+                                @foreach (var detail in report.TestCaseRunDetails.Where(detailItem => detailItem.Passed == false))
+                                {
                                     <div class="row">
                                         <h4 class="col-md-3"><b>File Name</b></h4>
                                         <h4 class="col-md-3"><b>Name</b></h4>
@@ -57,30 +109,11 @@
                                         <div class="col-md-3">@Html.DisplayFor(detailItem => detail.Name)</div>
                                         <div class="col-md-6">@Html.DisplayFor(detailItem => detail.Description)</div>
                                     </div>
-                                </div>
-                            }
+                                }
+                            </div>
                         </div>
-                        reportCount++;
+                        nightReportCount++;
                     }
-                </div>
-            </div>
-        </div>
-    </div>
-    <span class="col-md-12" />
-    <div class="panel-group">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <div class="row" data-toggle="collapse" href="#collapse3">
-                    <div class="col-md-8">Last's Night Run</div>
-                    <div class="col-md-4">test</div>
-                </div>
-            </div>
-            <div id="collapse3" class="panel-collapse collapse">
-                <div data-toggle="collapse" href="#collapse4">
-                    <div class="panel-body">Panel Body</div>
-                </div>
-                <div id="collapse4" class="panel-collapse collapse">
-                    <div class="panel-body">Panel Body</div>
                 </div>
             </div>
         </div>

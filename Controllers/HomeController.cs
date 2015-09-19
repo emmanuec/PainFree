@@ -1,18 +1,22 @@
-﻿using AutomationManagementTool.Models;
+﻿using PainFree.Helpers.TestData;
+using PainFree.Models;
+using System;
+using System.Linq;
 using System.Web.Mvc;
 
-namespace AutomationManagementTool.Controllers
+namespace PainFree.Controllers
 {
     public class HomeController : Controller
     {
-        private TestReports testReports = TestReports.getInstance();
+        public static readonly DateTime dataBeginTime = DateTime.Now.AddDays(-1).Date.Add(new TimeSpan(13, 30, 0));
+        public static readonly DateTime dataEndTime = DateTime.Now.Date.Add(new TimeSpan(13, 30, 0));
 
         public ActionResult Index()
         {
-            var failedTestReports = testReports.getFailedTestReports();
-            var test = TestReports.getNoonRunTestReports(failedTestReports);
+            var testDataItems = TestData.getData(dataBeginTime, dataEndTime);
+            var failedTestDataItems = testDataItems.Where(data => data.NumberOfFailures > 0).ToList();
 
-            return View(failedTestReports);
+            return View(failedTestDataItems);
         }
 
         public ActionResult About()
